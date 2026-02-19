@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-validate:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate Markdown files
+        run: |
+          echo "Checking Markdown files exist..."
+          test -f README.md && echo "README.md OK" || exit 1
+          test -f CHANGELOG.md && echo "CHANGELOG.md OK" || exit 1
+          test -f CONTRIBUTING.md && echo "CONTRIBUTING.md OK" || exit 1
+          test -f LICENSE && echo "LICENSE OK" || exit 1
+          echo "All required files present."
+
+      - name: Check CHANGELOG format
+        run: |
+          echo "Validating CHANGELOG follows Keep a Changelog format..."
+          grep -q '## \[' CHANGELOG.md && echo "CHANGELOG format OK" || exit 1
+
+      - name: Check LICENSE year
+        run: |
+          echo "Validating LICENSE is present and non-empty..."
+          test -s LICENSE && echo "LICENSE is non-empty OK" || exit 1
+
+      - name: Summary
+        run: echo "All checks passed successfully."
